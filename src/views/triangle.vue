@@ -1,6 +1,6 @@
 <template>
     <div>
-        <canvas width="600" height="480" id="webgpucanvas"></canvas>
+        <canvas width="200" height="100" id="webgpucanvas"></canvas>
     </div>
 </template>
 

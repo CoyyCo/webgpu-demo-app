@@ -1,6 +1,6 @@
 <template>
     <div>
-        <canvas width="300" height="240" id="webgpucanvas"></canvas>
+        <canvas width="480" height="240" id="webgpucanvas"></canvas>
     </div>
 </template>
 
@@ -41,7 +41,7 @@ onMounted(async () => {
         usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
     })
     device.queue.writeBuffer(vertexbuffer, 0, vertexArray)
-    const zVertexArray = new Float32Array([1.0, -1.0, 1.0])
+    const zVertexArray = new Float32Array([1.0, 1.0, 1.0])
 
     const zVertexBuffer = device.createBuffer({
         size: zVertexArray.byteLength,

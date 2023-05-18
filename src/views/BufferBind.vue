@@ -1,6 +1,6 @@
 <template>
     <div>
-        <canvas width="300" height="240" id="webgpucanvas"></canvas>
+        <canvas width="480" height="240" id="webgpucanvas"></canvas>
     </div>
 </template>
 
@@ -75,7 +75,7 @@ onMounted(async () => {
         layout: pipeline.getBindGroupLayout(0), //获取索引为0的绑定组布局
         entries: [
             {
-                binding: 0,
+                binding: 1,
                 resource: { buffer: colorbuffer }
             }
         ]
@@ -95,7 +95,7 @@ onMounted(async () => {
     passEncoder.setPipeline(pipeline)
     passEncoder.setVertexBuffer(0, vertexbuffer)
     passEncoder.setBindGroup(0, bindGroup)
-    passEncoder.draw(3, 1, 0, 0)
+    passEncoder.draw(3)
     passEncoder.end()
     device.queue.submit([commandEncoder.finish()])
 })

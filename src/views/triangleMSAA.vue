@@ -5,46 +5,27 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import useWebgpu from '../hooks/useWebgpu';
+import useWebgpu from "../hooks/useWebgpu";
+import vert from '@/shaders/triangle.vert.wgsl?raw'
 import frag from '@/shaders/red.frag.wgsl?raw'
-import vert from '@/shaders/dynamic.vert.wgsl?raw'
+import { onMounted} from 'vue';
 onMounted(async () => {
-    let canvas = document.getElementById('webgpucanvas') as HTMLCanvasElement
+    let canvas = document.getElementById("webgpucanvas") as HTMLCanvasElement
     const { context, device } = await useWebgpu(canvas);
     //配置canvas上下文
     const canvsConfig: GPUCanvasConfiguration = {
         device,
         format: navigator.gpu.getPreferredCanvasFormat(),
-        alphaMode: "premultiplied",
+        alphaMode: "premultiplied",  
     }
     context?.configure(canvsConfig)
-    //在JS中定义顶点坐标位置信息
-    const vertexArray = new Float32Array([
-        0.0, 1,
-        -0.5, -0.5,
-        0.5, -0.5
-    ])
-    const vertexbuffer = device.createBuffer({
-        size: vertexArray.byteLength,
-        usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST
-    })
-    device.queue.writeBuffer(vertexbuffer, 0, vertexArray)
-    //创建渲染管线
+    // //创建渲染管线
     const pipeline = device.createRenderPipeline({
         vertex: {
             module: device.createShaderModule({
                 code: vert,
             }),
             entryPoint: 'main',
-            buffers: [{
-                arrayStride: 2 * 4,//步幅，2个参数，每个参数4个字节
-                attributes: [{
-                    shaderLocation: 0,//表示对应wgsl中的第0个参数
-                    offset: 0,//索引偏移
-                    format: "float32x2"
-                }]
-            }]
         },
         fragment: {
             module: device.createShaderModule({
@@ -60,26 +41,38 @@ onMounted(async () => {
         primitive: {
             topology: 'triangle-list',
         },
-        layout: 'auto'
+        layout: 'auto',
+        multisample:{  //用于描述渲染过程中如何与多采样附件进行交互
+            count:4  //表示每个像素采用数量，仅与具有sampleCuunt纹理的colorAttachments和depthStencilAttachments附件进行交互
+        }
     });
-    //创建命令编码器
-    const commandEncoder = device.createCommandEncoder()
-    //创建渲染通道编码器
-    const passEncoder = commandEncoder.beginRenderPass({
+    draw(device, context!, pipeline,canvas)
+})
+const draw = (device: GPUDevice, context: GPUCanvasContext, pipeline: GPURenderPipeline,canvas:HTMLCanvasElement) => {
+    const commandEncoder = device.createCommandEncoder();
+    //多采样纹理
+    const MSAATexture = device.createTexture({
+        size:[canvas.width,canvas.height],
+        format:navigator.gpu.getPreferredCanvasFormat(),
+        usage:GPUTextureUsage.RENDER_ATTACHMENT,
+        sampleCount:4
+    })
+    const renderPassDescriptor: GPURenderPassDescriptor = {
         colorAttachments: [{
-            view: context!.getCurrentTexture().createView(),
+            view:MSAATexture.createView(),
+            resolveTarget: context.getCurrentTexture().createView(),
             clearValue: { r: 0, g: 0, b: 0, a: 1 },
             loadOp: 'clear',
             storeOp: 'store'
 
         }]
-    })
+    }
+    const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor)
     passEncoder.setPipeline(pipeline)
-    passEncoder.setVertexBuffer(0, vertexbuffer)
     passEncoder.draw(3, 1, 0, 0)
     passEncoder.end()
     device.queue.submit([commandEncoder.finish()])
-})
+}
 </script>
 
-<style scoped lang="scss"></style>
+<style lang="scss" scoped></style>

@@ -34,4 +34,14 @@ export const list = [
     name: "绘制立方体",
     component: () => import("@/views/cube.vue"),
   },
+  {
+    path: "/cube2",
+    name: "两个立方体",
+    component: () => import("@/views/cube2.vue"),
+  },
+  {
+    path: "/cubeAndtriangle",
+    name: "绘制立方体和三角形",
+    component: () => import("@/views/cubeAndtriangle.vue"),
+  },
 ];

@@ -44,4 +44,14 @@ export const list = [
     name: "绘制立方体和三角形",
     component: () => import("@/views/cubeAndtriangle.vue"),
   },
+  {
+    path: "/imageCube",
+    name: "图片贴图",
+    component: () => import("@/views/imageCube.vue"),
+  },
+  {
+    path:"/videoCube",
+    name:"视频贴图",
+    component:()=>import("@/views/videoCube.vue")
+  }
 ];
